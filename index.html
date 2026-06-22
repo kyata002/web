@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gia Phả Ký - Sơ đồ Gia Phả Tương Tác</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="light-theme">
+    <div id="error-console" style="display:none; background:#fee2e2; border:2px solid #ef4444; color:#991b1b; padding:16px; margin:16px; border-radius:8px; font-family:monospace; font-size:13px; z-index:9999; position:relative;">
+        <h4 style="margin:0; font-weight:600;"><i class="fa-solid fa-triangle-exclamation"></i> Lỗi JavaScript Hệ Thống:</h4>
+        <pre id="error-log" style="white-space:pre-wrap; margin-top:8px; font-family:monospace;"></pre>
+    </div>
+    <script>
+        window.onerror = function(message, source, lineno, colno, error) {
+            var consoleDiv = document.getElementById("error-console");
+            var logPre = document.getElementById("error-log");
+            if (consoleDiv && logPre) {
+                consoleDiv.style.display = "block";
+                logPre.textContent += message + "\nTại: " + source + " dòng " + lineno + ":" + colno + "\n\n";
+            }
+            return false;
+        };
+    </script>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo-area">
+                <i class="fa-solid fa-hands-holding-child logo-icon"></i>
+                <div class="logo-text">
+                    <h1>Gia Phả Ký</h1>
+                    <span>Sơ đồ gia phả trực quan</span>
+                </div>
+            </div>
+            
+            <div class="search-bar-container">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" id="search-input" placeholder="Tìm kiếm thành viên trong gia tộc...">
+                <div id="search-results" class="search-results-dropdown hidden"></div>
+            </div>
+
+            <div class="header-actions">
+                <button id="btn-stats" class="btn btn-secondary" title="Thống kê gia phả">
+                    <i class="fa-solid fa-chart-pie"></i> <span class="btn-text">Thống kê</span>
+                </button>
+                <button id="btn-reset-demo" class="btn btn-secondary" title="Khôi phục dữ liệu mẫu">
+                    <i class="fa-solid fa-rotate-left"></i> <span class="btn-text">Đặt lại mẫu</span>
+                </button>
+                <button id="btn-export" class="btn btn-secondary" title="Xuất dữ liệu JSON">
+                    <i class="fa-solid fa-file-export"></i> <span class="btn-text">Xuất JSON</span>
+                </button>
+                <button id="btn-import-trigger" class="btn btn-secondary" title="Nhập dữ liệu JSON">
+                    <i class="fa-solid fa-file-import"></i> <span class="btn-text">Nhập JSON</span>
+                </button>
+                <input type="file" id="import-file-input" accept=".json" class="hidden">
+                
+                <button id="theme-toggle" class="btn btn-icon" title="Đổi giao diện">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="app-main">
+            <!-- Tree Canvas Area -->
+            <div class="tree-container" id="tree-container">
+                <!-- Floating Banner for Relation Mode -->
+                <div id="relation-calc-banner" class="relation-banner hidden">
+                    <div class="banner-content">
+                        <i class="fa-solid fa-people-arrows banner-icon"></i>
+                        <span>Đang tính xưng hô: Chọn thành viên thứ 2 trên sơ đồ...</span>
+                    </div>
+                    <button id="btn-cancel-relation-mode" class="btn btn-sm btn-secondary">Hủy</button>
+                </div>
+
+                <!-- SVG Canvas for Family Tree -->
+                <svg id="tree-svg" class="tree-svg">
+                    <g id="tree-viewport">
+                        <g id="links-group"></g>
+                        <g id="nodes-group"></g>
+                    </g>
+                </svg>
+
+                <!-- Floating Canvas Controls -->
+                <div class="canvas-controls">
+                    <button id="ctrl-zoom-in" class="btn-ctrl" title="Phóng to"><i class="fa-solid fa-plus"></i></button>
+                    <button id="ctrl-zoom-out" class="btn-ctrl" title="Thu nhỏ"><i class="fa-solid fa-minus"></i></button>
+                    <button id="ctrl-fit" class="btn-ctrl" title="Căn giữa sơ đồ"><i class="fa-solid fa-expand"></i></button>
+                    <button id="ctrl-reset" class="btn-ctrl" title="Reset thu phóng"><i class="fa-solid fa-arrows-to-dot"></i></button>
+                </div>
+
+                <!-- Legend / Chú thích -->
+                <div class="legend-panel">
+                    <div class="legend-item"><span class="legend-dot male"></span> Nam</div>
+                    <div class="legend-item"><span class="legend-dot female"></span> Nữ</div>
+                    <div class="legend-item"><span class="legend-dot deceased"></span> Đã mất (Ngày giỗ)</div>
+                </div>
+            </div>
+
+            <!-- Sidebar / Control Panel -->
+            <aside class="app-sidebar" id="app-sidebar">
+                <!-- Empty State (No member selected) -->
+                <div id="sidebar-empty-state" class="sidebar-panel active">
+                    <div class="empty-state-content">
+                        <i class="fa-solid fa-network-wired empty-icon"></i>
+                        <h3>Khám Phá Gia Tộc</h3>
+                        <p>Chọn một thành viên trên sơ đồ để xem thông tin chi tiết, chỉnh sửa hoặc thêm thế hệ mới.</p>
+                        
+                        <div class="quick-stats-card">
+                            <h4><i class="fa-solid fa-chart-line"></i> Thông tin chung</h4>
+                            <div class="quick-stats-grid">
+                                <div class="stat-item">
+                                    <span class="stat-val" id="qs-total">0</span>
+                                    <span class="stat-lbl">Thành viên</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-val" id="qs-generations">0</span>
+                                    <span class="stat-lbl">Thế hệ</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detail Panel -->
+                <div id="sidebar-detail-panel" class="sidebar-panel hidden">
+                    <div class="sidebar-header">
+                        <button id="btn-back-to-empty" class="btn-icon-back" title="Quay lại"><i class="fa-solid fa-chevron-left"></i> Quay lại</button>
+                        <div class="member-actions-top">
+                            <button id="btn-edit-member" class="btn btn-primary-outline btn-sm"><i class="fa-solid fa-pen"></i> Sửa</button>
+                            <button id="btn-delete-member" class="btn btn-danger-outline btn-sm"><i class="fa-solid fa-trash"></i> Xóa</button>
+                        </div>
+                    </div>
+
+                    <div class="member-profile-summary">
+                        <div class="profile-avatar-container">
+                            <img id="detail-avatar" src="" alt="Avatar" class="profile-avatar">
+                        </div>
+                        <h2 id="detail-name" class="profile-name">Nguyễn Văn A</h2>
+                        <p id="detail-dates" class="profile-dates">1950 - Chưa rõ</p>
+                        <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
+                            <span id="detail-gender-badge" class="badge">Nam</span>
+                            <button id="btn-calc-relation" class="btn btn-secondary btn-sm" style="padding: 4px 8px; font-size: 11px;" title="Xem xưng hô với người khác">
+                                <i class="fa-solid fa-people-arrows"></i> Tính xưng hô
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Relationship Calculation Result Box -->
+                    <div id="relation-result-card" class="relation-result-card hidden">
+                        <div class="relation-result-header">
+                            <h4><i class="fa-solid fa-calculator"></i> Kết quả quan hệ xưng hô</h4>
+                            <button id="btn-close-relation-result" class="btn-close-small">&times;</button>
+                        </div>
+                        <div class="relation-result-body">
+                            <div class="relation-path-visual" id="relation-path-visual">
+                                <!-- JS draws the path flow -->
+                            </div>
+                            <div class="relation-summary-text" id="relation-summary-text">
+                                <!-- JS text -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3><i class="fa-solid fa-info-circle"></i> Thông tin cơ bản</h3>
+                        <div class="info-list">
+                            <div class="info-row">
+                                <span class="info-label">Ngày sinh:</span>
+                                <span class="info-value" id="detail-birth-date">-</span>
+                            </div>
+                            <div class="info-row" id="detail-death-row">
+                                <span class="info-label">Ngày giỗ (mất):</span>
+                                <span class="info-value" id="detail-death-date">-</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Nghề nghiệp:</span>
+                                <span class="info-value" id="detail-job">-</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Thế hệ thứ:</span>
+                                <span class="info-value" id="detail-generation">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Video Section -->
+                    <div class="detail-section id-video-section hidden" id="detail-video-section">
+                        <h3><i class="fa-solid fa-video"></i> Video tư liệu</h3>
+                        <div class="video-container" id="detail-video-container">
+                            <!-- Youtube Iframe or Video Tag -->
+                        </div>
+                    </div>
+
+                    <div class="detail-section" id="detail-relationships-section">
+                        <h3><i class="fa-solid fa-users-rectangle"></i> Mối quan hệ thân cận</h3>
+                        <div id="detail-relations-list" class="relations-list">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <div class="detail-section" id="detail-bio-section">
+                        <h3><i class="fa-solid fa-book-open"></i> Tiểu sử / Ghi chú</h3>
+                        <p id="detail-bio" class="bio-text">Chưa có thông tin tiểu sử chi tiết.</p>
+                    </div>
+
+                    <!-- Add Relation Fast Actions -->
+                    <div class="detail-section relation-actions">
+                        <h3><i class="fa-solid fa-plus-circle"></i> Thêm liên kết gia đình</h3>
+                        <div class="relation-buttons-grid">
+                            <button id="btn-add-spouse" class="btn btn-accent btn-sm"><i class="fa-solid fa-heart"></i> Thêm Vợ/Chồng</button>
+                            <button id="btn-add-child" class="btn btn-accent btn-sm"><i class="fa-solid fa-child"></i> Thêm Con cái</button>
+                            <button id="btn-add-parent" class="btn btn-accent btn-sm"><i class="fa-solid fa-user-tie"></i> Thêm Cha/Mẹ</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Editor Form Panel -->
+                <div id="sidebar-form-panel" class="sidebar-panel hidden">
+                    <div class="sidebar-header">
+                        <button id="btn-cancel-edit" class="btn-icon-back"><i class="fa-solid fa-chevron-left"></i> Hủy</button>
+                        <h3 id="form-title">Chỉnh sửa thông tin</h3>
+                    </div>
+
+                    <form id="member-form" class="member-form">
+                        <input type="hidden" id="form-member-id">
+                        <input type="hidden" id="form-action-type"> <!-- 'edit', 'add-spouse', 'add-child', 'add-parent' -->
+                        <input type="hidden" id="form-relation-source-id">
+
+                        <div class="form-group">
+                            <label for="form-name">Họ và tên <span class="required">*</span></label>
+                            <input type="text" id="form-name" required placeholder="Nhập họ và tên đầy đủ">
+                        </div>
+
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label for="form-gender">Giới tính</label>
+                                <select id="form-gender">
+                                    <option value="Nam">Nam</option>
+                                    <option value="Nữ">Nữ</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="form-status">Trạng thái</label>
+                                <select id="form-status">
+                                    <option value="alive">Còn sống</option>
+                                    <option value="deceased">Đã mất (Ngày giỗ)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label for="form-birth-date">Ngày sinh</label>
+                                <input type="text" id="form-birth-date" placeholder="DD/MM/YYYY hoặc năm">
+                            </div>
+                            <div class="form-group" id="form-death-date-group">
+                                <label for="form-death-date">Ngày giỗ (Ngày mất)</label>
+                                <input type="text" id="form-death-date" placeholder="DD/MM/YYYY hoặc năm">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="form-job">Nghề nghiệp</label>
+                            <input type="text" id="form-job" placeholder="Ví dụ: Giáo viên, Kỹ sư...">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="form-video">Link Video tư liệu (YouTube / URL)</label>
+                            <input type="text" id="form-video" placeholder="https://www.youtube.com/watch?v=...">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Chọn ảnh đại diện mẫu</label>
+                            <div class="avatar-picker" id="avatar-picker">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="form-bio">Tiểu sử / Ghi chú thêm</label>
+                            <textarea id="form-bio" rows="4" placeholder="Nhập tóm tắt tiểu sử, quê quán, học văn..."></textarea>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" id="btn-form-cancel" class="btn btn-secondary">Hủy bỏ</button>
+                            <button type="submit" id="btn-form-save" class="btn btn-primary">Lưu thay đổi</button>
+                        </div>
+                    </form>
+                </div>
+            </aside>
+        </main>
+
+        <!-- Statistics Modal -->
+        <div id="stats-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fa-solid fa-chart-column"></i> Thống Kê Phả Hệ</h2>
+                    <button class="modal-close" id="btn-close-stats">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="stats-overview-grid">
+                        <div class="stats-card card-primary">
+                            <div class="card-icon"><i class="fa-solid fa-users"></i></div>
+                            <div class="card-info">
+                                <h3 id="stat-total-members">0</h3>
+                                <p>Tổng số thành viên</p>
+                            </div>
+                        </div>
+                        <div class="stats-card card-success">
+                            <div class="card-icon"><i class="fa-solid fa-venus-mars"></i></div>
+                            <div class="card-info">
+                                <h3><span id="stat-male-ratio">0</span> / <span id="stat-female-ratio">0</span></h3>
+                                <p>Tỷ lệ Nam / Nữ</p>
+                            </div>
+                        </div>
+                        <div class="stats-card card-warning">
+                            <div class="card-icon"><i class="fa-solid fa-hourglass-half"></i></div>
+                            <div class="card-info">
+                                <h3 id="stat-avg-age">0</h3>
+                                <p>Tuổi thọ trung bình</p>
+                            </div>
+                        </div>
+                        <div class="stats-card card-info">
+                            <div class="card-icon"><i class="fa-solid fa-sitemap"></i></div>
+                            <div class="card-info">
+                                <h3 id="stat-max-generations">0</h3>
+                                <p>Số thế hệ trong dòng tộc</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stats-details">
+                        <div class="stats-column">
+                            <h3>Thành viên lớn tuổi nhất</h3>
+                            <ul id="stats-oldest-list" class="stats-list">
+                                <!-- JS -->
+                            </ul>
+                        </div>
+                        <div class="stats-column">
+                            <h3>Phân bố thành viên theo thế hệ</h3>
+                            <div id="generation-bar-chart" class="generation-bar-chart">
+                                <!-- JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script src="app.js"></script>
+</body>
+</html>
