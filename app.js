@@ -391,6 +391,33 @@ function setupEventListeners() {
             currentZoom = Math.min(Math.max(currentZoom, 0.2), 3);
             applyTransform();
         }, { passive: false });
+
+        // Touch events for mobile dragging
+        let lastTouchX = 0;
+        let lastTouchY = 0;
+        
+        container.addEventListener("touchstart", (e) => {
+            if (e.touches.length === 1) {
+                isPanning = true;
+                lastTouchX = e.touches[0].clientX;
+                lastTouchY = e.touches[0].clientY;
+            }
+        }, { passive: true });
+
+        container.addEventListener("touchmove", (e) => {
+            if (!isPanning || e.touches.length !== 1) return;
+            const deltaX = e.touches[0].clientX - lastTouchX;
+            const deltaY = e.touches[0].clientY - lastTouchY;
+            currentPanX += deltaX;
+            currentPanY += deltaY;
+            lastTouchX = e.touches[0].clientX;
+            lastTouchY = e.touches[0].clientY;
+            applyTransform();
+        }, { passive: true });
+
+        container.addEventListener("touchend", () => {
+            isPanning = false;
+        }, { passive: true });
     }
 
     window.addEventListener("mousemove", (e) => {
@@ -588,8 +615,19 @@ function setupEventListeners() {
     }
 }
 
-function applyTransform() {
+function applyTransform(smooth = false) {
     const viewport = document.getElementById("tree-viewport");
+    if (!viewport) return;
+    
+    if (smooth) {
+        viewport.style.transition = "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)";
+        setTimeout(() => {
+            viewport.style.transition = "none";
+        }, 400);
+    } else {
+        viewport.style.transition = "none";
+    }
+    
     viewport.setAttribute("transform", `translate(${currentPanX}, ${currentPanY}) scale(${currentZoom})`);
 }
 
@@ -1015,7 +1053,7 @@ function fitTreeToScreen() {
     if (isNaN(currentPanX)) currentPanX = 50;
     if (isNaN(currentPanY)) currentPanY = 50;
 
-    applyTransform();
+    applyTransform(true);
 }
 
 function focusOnNode(memberId) {
@@ -1031,7 +1069,7 @@ function focusOnNode(memberId) {
     currentPanX = containerW / 2 - (loc.x + NODE_WIDTH / 2);
     currentPanY = containerH / 2 - (loc.y + NODE_HEIGHT / 2);
 
-    applyTransform();
+    applyTransform(true);
 }
 
 // -------------------------------------------------------------
@@ -1769,6 +1807,47 @@ function importFromJson(e) {
     };
     reader.readAsText(file);
 }
+
+// Custom Toast Notification System
+function showToast(message, type = "success") {
+    let container = document.getElementById("toast-container");
+    if (!container) {
+        container = document.createElement("div");
+        container.id = "toast-container";
+        document.body.appendChild(container);
+    }
+    const toast = document.createElement("div");
+    toast.className = `toast toast-${type}`;
+    
+    let iconClass = "fa-circle-check";
+    if (type === "error") iconClass = "fa-circle-exclamation";
+    if (type === "info") iconClass = "fa-circle-info";
+    if (type === "warning") iconClass = "fa-triangle-exclamation";
+
+    toast.innerHTML = `
+        <i class="fa-solid ${iconClass} toast-icon"></i>
+        <div class="toast-content">${message}</div>
+    `;
+    container.appendChild(toast);
+    
+    // Animate in
+    setTimeout(() => toast.classList.add("show"), 10);
+    
+    // Remove after 3.5s
+    setTimeout(() => {
+        toast.classList.remove("show");
+        setTimeout(() => toast.remove(), 400);
+    }, 3500);
+}
+
+// Override native alert with custom Toast
+window.alert = function(message) {
+    const isError = message.toLowerCase().includes("lỗi") || 
+                    message.toLowerCase().includes("không hợp lệ") || 
+                    message.toLowerCase().includes("thất bại") ||
+                    message.toLowerCase().includes("chưa");
+    showToast(message, isError ? "error" : "success");
+};
 
 // Register Service Worker for PWA
 if ('serviceWorker' in navigator) {
