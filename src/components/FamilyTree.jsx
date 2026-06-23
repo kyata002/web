@@ -23,6 +23,10 @@ export default function FamilyTree({
   const containerRef = useRef(null);
   const dragStart = useRef({ x: 0, y: 0 });
   const touchStart = useRef({ x: 0, y: 0 });
+  const touchStartDistance = useRef(0);
+  const touchStartZoom = useRef(1.0);
+  const touchStartPan = useRef({ x: 0, y: 0 });
+  const touchStartMid = useRef({ x: 0, y: 0 });
 
   const { nodes, links } = calculateLayout(members, collapsedNodes);
 
@@ -147,7 +151,7 @@ export default function FamilyTree({
     setIsPanning(false);
   };
 
-  // Touch Handlers for mobile swipe-to-pan
+  // Touch Handlers for mobile swipe-to-pan & pinch-to-zoom
   const handleTouchStart = (e) => {
     if (e.touches.length === 1) {
       setIsPanning(true);
@@ -155,17 +159,53 @@ export default function FamilyTree({
         x: e.touches[0].clientX - panX,
         y: e.touches[0].clientY - panY
       };
+      touchStartDistance.current = 0;
+    } else if (e.touches.length === 2) {
+      setIsPanning(true);
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      touchStartDistance.current = dist;
+      touchStartZoom.current = zoom;
+      touchStartPan.current = { x: panX, y: panY };
+      touchStartMid.current = {
+        x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+        y: (e.touches[0].clientY + e.touches[1].clientY) / 2
+      };
     }
   };
 
   const handleTouchMove = (e) => {
-    if (!isPanning || e.touches.length !== 1) return;
-    setPanX(e.touches[0].clientX - touchStart.current.x);
-    setPanY(e.touches[0].clientY - touchStart.current.y);
+    if (!isPanning) return;
+    
+    if (e.touches.length === 1 && touchStartDistance.current === 0) {
+      setPanX(e.touches[0].clientX - touchStart.current.x);
+      setPanY(e.touches[0].clientY - touchStart.current.y);
+    } else if (e.touches.length === 2 && touchStartDistance.current > 0) {
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      const factor = dist / touchStartDistance.current;
+      let targetZoom = touchStartZoom.current * factor;
+      targetZoom = Math.min(Math.max(targetZoom, 0.2), 3);
+
+      const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+
+      const targetPanX = midX - (midX - touchStartPan.current.x) * (targetZoom / touchStartZoom.current);
+      const targetPanY = midY - (midY - touchStartPan.current.y) * (targetZoom / touchStartZoom.current);
+
+      setZoom(targetZoom);
+      setPanX(targetPanX);
+      setPanY(targetPanY);
+    }
   };
 
   const handleTouchEnd = () => {
     setIsPanning(false);
+    touchStartDistance.current = 0;
   };
 
   // Wheel Zoom Handler
@@ -193,12 +233,24 @@ export default function FamilyTree({
   // Zoom Button controls
   const handleZoomIn = () => {
     const targetZoom = Math.min(zoom + 0.15, 3);
-    applyPanZoom(panX, panY, targetZoom, true);
+    const containerW = containerRef.current ? containerRef.current.clientWidth : 800;
+    const containerH = containerRef.current ? containerRef.current.clientHeight : 600;
+    const cx = containerW / 2;
+    const cy = containerH / 2;
+    const targetPanX = cx - (cx - panX) * (targetZoom / zoom);
+    const targetPanY = cy - (cy - panY) * (targetZoom / zoom);
+    applyPanZoom(targetPanX, targetPanY, targetZoom, true);
   };
 
   const handleZoomOut = () => {
     const targetZoom = Math.max(zoom - 0.15, 0.2);
-    applyPanZoom(panX, panY, targetZoom, true);
+    const containerW = containerRef.current ? containerRef.current.clientWidth : 800;
+    const containerH = containerRef.current ? containerRef.current.clientHeight : 600;
+    const cx = containerW / 2;
+    const cy = containerH / 2;
+    const targetPanX = cx - (cx - panX) * (targetZoom / zoom);
+    const targetPanY = cy - (cy - panY) * (targetZoom / zoom);
+    applyPanZoom(targetPanX, targetPanY, targetZoom, true);
   };
 
   const handleResetZoom = () => {
