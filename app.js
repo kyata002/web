@@ -1049,6 +1049,10 @@ function selectMember(id) {
     
     const detailPanel = document.getElementById("sidebar-detail-panel");
     detailPanel.classList.remove("hidden");
+    
+    // Open sidebar on mobile
+    const sidebar = document.getElementById("app-sidebar");
+    if (sidebar) sidebar.classList.add("open");
 
     // Profile summary
     document.getElementById("detail-avatar").src = getAvatarDataUrl(m.avatar, m.name, m.gender);
@@ -1161,6 +1165,10 @@ function deselectMember() {
     document.getElementById("sidebar-form-panel").classList.add("hidden");
     document.getElementById("relation-result-card").classList.add("hidden");
     document.getElementById("sidebar-empty-state").classList.remove("hidden");
+    
+    // Close sidebar on mobile
+    const sidebar = document.getElementById("app-sidebar");
+    if (sidebar) sidebar.classList.remove("open");
 }
 
 // -------------------------------------------------------------
