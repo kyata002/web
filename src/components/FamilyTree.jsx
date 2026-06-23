@@ -77,13 +77,31 @@ export default function FamilyTree({
     const scaleX = (safeW - 80) / treeW;
     const scaleY = (safeH - 80) / treeH;
     
+    const isMobile = window.innerWidth <= 768;
+    
     let targetZoom = Math.min(Math.min(scaleX, scaleY), 1.0);
-    if (isNaN(targetZoom) || targetZoom <= 0.05) {
+    if (isMobile) {
+      targetZoom = 1.2; // Phóng to hơn ở di động để đọc rõ chữ trên điện thoại
+    } else if (isNaN(targetZoom) || targetZoom <= 0.05) {
       targetZoom = 0.5;
     }
 
-    let targetPanX = (safeW - treeW * targetZoom) / 2 - minX * targetZoom;
-    let targetPanY = (safeH - treeH * targetZoom) / 2 - minY * targetZoom;
+    let targetPanX, targetPanY;
+    
+    // Tìm cụ tổ (root node) để căn giữa trên mobile
+    const rootId = nodeKeys.find(id => {
+      const m = members.find(x => x.id === id);
+      return m && (!m.parents || m.parents.length === 0);
+    }) || nodeKeys[0];
+
+    if (isMobile && rootId && nodes[rootId]) {
+      const rootLoc = nodes[rootId];
+      targetPanX = safeW / 2 - (rootLoc.x + NODE_WIDTH / 2) * targetZoom;
+      targetPanY = 80; // Đặt cụ tổ ở phần trên màn hình
+    } else {
+      targetPanX = (safeW - treeW * targetZoom) / 2 - minX * targetZoom;
+      targetPanY = (safeH - treeH * targetZoom) / 2 - minY * targetZoom;
+    }
 
     if (isNaN(targetPanX)) targetPanX = 50;
     if (isNaN(targetPanY)) targetPanY = 50;
@@ -98,9 +116,10 @@ export default function FamilyTree({
     const containerW = containerRef.current ? containerRef.current.clientWidth : 800;
     const containerH = containerRef.current ? containerRef.current.clientHeight : 600;
 
-    const targetZoom = 1.0;
-    const targetPanX = containerW / 2 - (loc.x + NODE_WIDTH / 2);
-    const targetPanY = containerH / 2 - (loc.y + NODE_HEIGHT / 2);
+    const isMobile = window.innerWidth <= 768;
+    const targetZoom = isMobile ? 1.2 : 1.0;
+    const targetPanX = containerW / 2 - (loc.x + NODE_WIDTH / 2) * targetZoom;
+    const targetPanY = containerH / 2 - (loc.y + NODE_HEIGHT / 2) * targetZoom;
 
     applyPanZoom(targetPanX, targetPanY, targetZoom, true);
   };
@@ -338,19 +357,38 @@ export default function FamilyTree({
         </g>
       </svg>
 
-      {/* Floating Canvas Controls */}
-      <div className="canvas-controls">
-        <button className="btn-ctrl" onClick={handleZoomIn} title="Phóng to">
-          <i className="fa-solid fa-plus"></i>
+      {/* Floating Canvas Controls - Map Style */}
+      <div className="absolute bottom-24 right-4 md:right-6 z-10 flex flex-col w-8 md:w-9 rounded-xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-stone-200/80 dark:border-slate-800/80 shadow-md overflow-hidden">
+        <button 
+          className="w-8 h-8 md:w-9 md:h-9 flex items-center justify-center text-stone-600 dark:text-slate-300 hover:bg-stone-100 dark:hover:bg-slate-800 transition-colors border-0 bg-transparent outline-none cursor-pointer"
+          onClick={handleZoomIn} 
+          title="Phóng to"
+        >
+          <i className="fa-solid fa-plus text-xs md:text-sm"></i>
         </button>
-        <button className="btn-ctrl" onClick={handleZoomOut} title="Thu nhỏ">
-          <i className="fa-solid fa-minus"></i>
+        <div className="h-px bg-stone-200/70 dark:bg-slate-800/70 w-full" />
+        <button 
+          className="w-8 h-8 md:w-9 md:h-9 flex items-center justify-center text-stone-600 dark:text-slate-300 hover:bg-stone-100 dark:hover:bg-slate-800 transition-colors border-0 bg-transparent outline-none cursor-pointer"
+          onClick={handleZoomOut} 
+          title="Thu nhỏ"
+        >
+          <i className="fa-solid fa-minus text-xs md:text-sm"></i>
         </button>
-        <button className="btn-ctrl" onClick={fitTreeToScreen} title="Căn giữa sơ đồ">
-          <i className="fa-solid fa-expand"></i>
+        <div className="h-px bg-stone-200/70 dark:bg-slate-800/70 w-full" />
+        <button 
+          className="w-8 h-8 md:w-9 md:h-9 flex items-center justify-center text-stone-600 dark:text-slate-300 hover:bg-stone-100 dark:hover:bg-slate-800 transition-colors border-0 bg-transparent outline-none cursor-pointer"
+          onClick={fitTreeToScreen} 
+          title="Căn giữa sơ đồ"
+        >
+          <i className="fa-solid fa-expand text-xs md:text-sm"></i>
         </button>
-        <button className="btn-ctrl" onClick={handleResetZoom} title="Reset thu phóng">
-          <i className="fa-solid fa-arrows-to-dot"></i>
+        <div className="h-px bg-stone-200/70 dark:bg-slate-800/70 w-full" />
+        <button 
+          className="w-8 h-8 md:w-9 md:h-9 flex items-center justify-center text-stone-600 dark:text-slate-300 hover:bg-stone-100 dark:hover:bg-slate-800 transition-colors border-0 bg-transparent outline-none cursor-pointer"
+          onClick={handleResetZoom} 
+          title="Reset thu phóng"
+        >
+          <i className="fa-solid fa-arrows-to-dot text-xs md:text-sm"></i>
         </button>
       </div>
 

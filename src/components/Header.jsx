@@ -70,14 +70,14 @@ export default function Header({
       </div>
 
       {/* Search Input */}
-      <div className="search-bar-container relative max-w-sm w-full mx-4" ref={dropdownRef}>
-        <div className="relative">
-          <i className="fa-solid fa-magnifying-glass search-icon absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 dark:text-slate-500 text-xs"></i>
+      <div className="relative w-auto flex-1 max-w-[160px] sm:max-w-[280px] md:max-w-sm mx-auto sm:mx-4" ref={dropdownRef}>
+        <div className="relative flex items-center">
+          <i className="fa-solid fa-magnifying-glass absolute left-3 text-stone-400 dark:text-slate-500 text-xs sm:text-sm pointer-events-none"></i>
           <input
             type="text"
             id="search-input"
-            className="w-full pl-9 pr-4 py-2 text-sm rounded-full border border-stone-200 dark:border-slate-800 bg-stone-50 dark:bg-slate-900 text-stone-800 dark:text-slate-200 placeholder-stone-400 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/15 focus:bg-white dark:focus:bg-slate-950 transition-all"
-            placeholder="Tìm kiếm người trong gia tộc..."
+            className="w-full pl-8 sm:pl-9 pr-3 sm:pr-4 py-1.5 sm:py-2 text-xs sm:text-sm rounded-full border border-stone-200 dark:border-slate-800 bg-stone-50 dark:bg-slate-900 text-stone-850 dark:text-slate-200 placeholder-stone-400 dark:placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/15 focus:bg-white dark:focus:bg-slate-950 transition-all text-left"
+            placeholder="Tìm kiếm..."
             value={searchTerm}
             onChange={handleSearchChange}
             onFocus={() => searchTerm.trim().length > 0 && setShowDropdown(true)}
@@ -139,14 +139,16 @@ export default function Header({
           {showMenu && (
             <div className="absolute right-0 mt-2 w-52 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-stone-200 dark:border-slate-800 rounded-2xl shadow-xl p-1.5 z-[110] flex flex-col gap-0.5 animate-in fade-in slide-in-from-top-2 duration-200">
               <button
-                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-stone-700 dark:text-slate-200 hover:bg-stone-50 dark:hover:bg-slate-800/60 rounded-xl transition-all border-0 bg-transparent outline-none cursor-pointer text-left"
+                className="w-full flex items-center gap-3 text-sm text-stone-700 dark:text-slate-200 hover:bg-stone-50 dark:hover:bg-slate-800/60 rounded-xl transition-all border-0 bg-transparent outline-none cursor-pointer text-left"
+                style={{ padding: '8px 16px' }}
                 onClick={() => { onStats(); setShowMenu(false); }}
               >
                 <i className="fa-solid fa-chart-pie text-amber-500 w-4 text-center"></i>
                 <span className="font-medium">Thống kê gia phả</span>
               </button>
               <button
-                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-stone-700 dark:text-slate-200 hover:bg-stone-50 dark:hover:bg-slate-800/60 rounded-xl transition-all border-0 bg-transparent outline-none cursor-pointer text-left"
+                className="w-full flex items-center gap-3 text-sm text-stone-700 dark:text-slate-200 hover:bg-stone-50 dark:hover:bg-slate-800/60 rounded-xl transition-all border-0 bg-transparent outline-none cursor-pointer text-left"
+                style={{ padding: '8px 16px' }}
                 onClick={() => { onResetDemo(); setShowMenu(false); }}
               >
                 <i className="fa-solid fa-rotate-left text-amber-500 w-4 text-center"></i>
@@ -154,7 +156,8 @@ export default function Header({
               </button>
               <div className="h-px bg-stone-100 dark:bg-slate-800 my-1 mx-2" />
               <button
-                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-stone-700 dark:text-slate-200 hover:bg-stone-50 dark:hover:bg-slate-800/60 rounded-xl transition-all border-0 bg-transparent outline-none cursor-pointer text-left"
+                className="w-full flex items-center gap-3 text-sm text-stone-700 dark:text-slate-200 hover:bg-stone-50 dark:hover:bg-slate-800/60 rounded-xl transition-all border-0 bg-transparent outline-none cursor-pointer text-left"
+                style={{ padding: '8px 16px' }}
                 onClick={() => { onExport(); setShowMenu(false); }}
               >
                 <i className="fa-solid fa-file-export text-amber-500 w-4 text-center"></i>
@@ -162,7 +165,8 @@ export default function Header({
               </button>
               <label
                 htmlFor="import-file-input-header"
-                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-stone-700 dark:text-slate-200 hover:bg-stone-50 dark:hover:bg-slate-800/60 rounded-xl transition-all border-0 bg-transparent outline-none cursor-pointer text-left"
+                className="w-full flex items-center gap-3 text-sm text-stone-700 dark:text-slate-200 hover:bg-stone-50 dark:hover:bg-slate-800/60 rounded-xl transition-all border-0 bg-transparent outline-none cursor-pointer text-left"
+                style={{ padding: '8px 16px' }}
               >
                 <i className="fa-solid fa-file-import text-amber-500 w-4 text-center"></i>
                 <span className="font-medium">Nhập dữ liệu JSON</span>
