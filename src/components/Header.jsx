@@ -137,31 +137,35 @@ export default function Header({
           </button>
 
           {showMenu && (
-            <div className="absolute right-0 mt-2 w-52 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-stone-200 dark:border-slate-800 rounded-2xl shadow-xl py-2 z-[110] animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="absolute right-0 mt-2 w-52 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-stone-200 dark:border-slate-800 rounded-2xl shadow-xl p-1.5 z-[110] flex flex-col gap-0.5 animate-in fade-in slide-in-from-top-2 duration-200">
               <button
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 dark:text-slate-200 hover:bg-stone-50 dark:hover:bg-slate-800/60 transition-colors text-left"
+                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-stone-700 dark:text-slate-200 hover:bg-stone-50 dark:hover:bg-slate-800/60 rounded-xl transition-all border-0 bg-transparent outline-none cursor-pointer text-left"
                 onClick={() => { onStats(); setShowMenu(false); }}
               >
-                <i className="fa-solid fa-chart-pie text-amber-500 w-4"></i> Thống kê gia phả
+                <i className="fa-solid fa-chart-pie text-amber-500 w-4 text-center"></i>
+                <span className="font-medium">Thống kê gia phả</span>
               </button>
               <button
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 dark:text-slate-200 hover:bg-stone-50 dark:hover:bg-slate-800/60 transition-colors text-left"
+                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-stone-700 dark:text-slate-200 hover:bg-stone-50 dark:hover:bg-slate-800/60 rounded-xl transition-all border-0 bg-transparent outline-none cursor-pointer text-left"
                 onClick={() => { onResetDemo(); setShowMenu(false); }}
               >
-                <i className="fa-solid fa-rotate-left text-amber-500 w-4"></i> Đặt lại mẫu
+                <i className="fa-solid fa-rotate-left text-amber-500 w-4 text-center"></i>
+                <span className="font-medium">Đặt lại mẫu</span>
               </button>
-              <div className="h-px bg-stone-100 dark:bg-slate-800 my-1" />
+              <div className="h-px bg-stone-100 dark:bg-slate-800 my-1 mx-2" />
               <button
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 dark:text-slate-200 hover:bg-stone-50 dark:hover:bg-slate-800/60 transition-colors text-left"
+                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-stone-700 dark:text-slate-200 hover:bg-stone-50 dark:hover:bg-slate-800/60 rounded-xl transition-all border-0 bg-transparent outline-none cursor-pointer text-left"
                 onClick={() => { onExport(); setShowMenu(false); }}
               >
-                <i className="fa-solid fa-file-export text-amber-500 w-4"></i> Xuất dữ liệu JSON
+                <i className="fa-solid fa-file-export text-amber-500 w-4 text-center"></i>
+                <span className="font-medium">Xuất dữ liệu JSON</span>
               </button>
               <label
                 htmlFor="import-file-input-header"
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 dark:text-slate-200 hover:bg-stone-50 dark:hover:bg-slate-800/60 transition-colors text-left cursor-pointer"
+                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-stone-700 dark:text-slate-200 hover:bg-stone-50 dark:hover:bg-slate-800/60 rounded-xl transition-all border-0 bg-transparent outline-none cursor-pointer text-left"
               >
-                <i className="fa-solid fa-file-import text-amber-500 w-4"></i> Nhập dữ liệu JSON
+                <i className="fa-solid fa-file-import text-amber-500 w-4 text-center"></i>
+                <span className="font-medium">Nhập dữ liệu JSON</span>
               </label>
               <input
                 type="file"
