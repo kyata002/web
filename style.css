@@ -79,7 +79,7 @@ body {
     background-color: var(--bg-primary);
     color: var(--text-primary);
     overflow: hidden;
-    height: 100vh;
+    height: 100dvh;
     width: 100vw;
     transition: background-color 0.3s, color 0.3s;
 }
@@ -109,7 +109,7 @@ body {
 .app-container {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    height: 100dvh;
     width: 100vw;
 }
 
@@ -335,7 +335,7 @@ body {
 .app-main {
     display: flex;
     flex: 1;
-    height: calc(100vh - var(--header-height));
+    height: calc(100dvh - var(--header-height));
     overflow: hidden;
 }
 
@@ -1283,7 +1283,7 @@ input[type="text"]:focus, select:focus, textarea:focus {
     
     /* SVG Tree container */
     .tree-container {
-        height: calc(100vh - 60px) !important;
+        height: calc(100dvh - 60px) !important;
         width: 100vw;
     }
     
@@ -1294,7 +1294,7 @@ input[type="text"]:focus, select:focus, textarea:focus {
         left: 0;
         right: 0;
         width: 100%;
-        height: 65vh;
+        height: 65dvh;
         max-height: 550px;
         border-top: 1px solid var(--border-color);
         border-radius: 24px 24px 0 0;
@@ -1326,7 +1326,7 @@ input[type="text"]:focus, select:focus, textarea:focus {
     }
 
     .sidebar-panel {
-        padding: 16px 20px 24px 20px;
+        padding: 16px 20px calc(24px + env(safe-area-inset-bottom)) 20px;
     }
     
     /* Canvas controls repositioning */
