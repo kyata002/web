@@ -296,7 +296,7 @@ export default function Sidebar({
           {/* Relationships list */}
           <div className="detail-section">
             <h3><i className="fa-solid fa-users-rectangle"></i> Mối quan hệ thân cận</h3>
-            <div className="relations-list">
+            <div className="grid grid-cols-2 gap-2 mt-2">
               {/* Render Parents */}
               {(selectedMember.parents || []).map(pId => {
                 const parent = members.find(x => x.id === pId);
@@ -305,13 +305,17 @@ export default function Sidebar({
                 return (
                   <div
                     key={pId}
-                    className="relation-item"
+                    className="flex items-center gap-2.5 p-2 rounded-xl border border-stone-200 dark:border-slate-800 bg-stone-50/50 dark:bg-slate-900/50 hover:bg-amber-50/30 dark:hover:bg-slate-800/50 cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] min-w-0"
                     onClick={() => { onSelectMember(pId); onFocusNode(pId); }}
                   >
-                    <img src={getAvatarDataUrl(parent.avatar, parent.name, parent.gender)} alt="" className="relation-item-avatar" />
-                    <div className="relation-item-info">
-                      <span className="relation-item-name">{parent.name}</span>
-                      <span className="relation-item-type">{label}</span>
+                    <img 
+                      src={getAvatarDataUrl(parent.avatar, parent.name, parent.gender)} 
+                      alt="" 
+                      className="w-9 h-9 rounded-full object-cover border border-stone-200 dark:border-slate-700 flex-shrink-0" 
+                    />
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-xs font-semibold text-stone-700 dark:text-slate-200 truncate leading-normal">{parent.name}</span>
+                      <span className="text-[10px] text-amber-600 dark:text-yellow-500 font-medium leading-none mt-0.5">{label}</span>
                     </div>
                   </div>
                 );
@@ -325,13 +329,17 @@ export default function Sidebar({
                 return (
                   <div
                     key={sId}
-                    className="relation-item"
+                    className="flex items-center gap-2.5 p-2 rounded-xl border border-stone-200 dark:border-slate-800 bg-stone-50/50 dark:bg-slate-900/50 hover:bg-amber-50/30 dark:hover:bg-slate-800/50 cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] min-w-0"
                     onClick={() => { onSelectMember(sId); onFocusNode(sId); }}
                   >
-                    <img src={getAvatarDataUrl(spouse.avatar, spouse.name, spouse.gender)} alt="" className="relation-item-avatar" />
-                    <div className="relation-item-info">
-                      <span className="relation-item-name">{spouse.name}</span>
-                      <span className="relation-item-type">{label}</span>
+                    <img 
+                      src={getAvatarDataUrl(spouse.avatar, spouse.name, spouse.gender)} 
+                      alt="" 
+                      className="w-9 h-9 rounded-full object-cover border border-stone-200 dark:border-slate-700 flex-shrink-0" 
+                    />
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-xs font-semibold text-stone-700 dark:text-slate-200 truncate leading-normal">{spouse.name}</span>
+                      <span className="text-[10px] text-amber-600 dark:text-yellow-500 font-medium leading-none mt-0.5">{label}</span>
                     </div>
                   </div>
                 );
@@ -344,25 +352,29 @@ export default function Sidebar({
                 return (
                   <div
                     key={cId}
-                    className="relation-item"
+                    className="flex items-center gap-2.5 p-2 rounded-xl border border-stone-200 dark:border-slate-800 bg-stone-50/50 dark:bg-slate-900/50 hover:bg-amber-50/30 dark:hover:bg-slate-800/50 cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] min-w-0"
                     onClick={() => { onSelectMember(cId); onFocusNode(cId); }}
                   >
-                    <img src={getAvatarDataUrl(child.avatar, child.name, child.gender)} alt="" className="relation-item-avatar" />
-                    <div className="relation-item-info">
-                      <span className="relation-item-name">{child.name}</span>
-                      <span className="relation-item-type">Con</span>
+                    <img 
+                      src={getAvatarDataUrl(child.avatar, child.name, child.gender)} 
+                      alt="" 
+                      className="w-9 h-9 rounded-full object-cover border border-stone-200 dark:border-slate-700 flex-shrink-0" 
+                    />
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-xs font-semibold text-stone-700 dark:text-slate-200 truncate leading-normal">{child.name}</span>
+                      <span className="text-[10px] text-amber-600 dark:text-yellow-500 font-medium leading-none mt-0.5">Con</span>
                     </div>
                   </div>
                 );
               })}
-
-              {/* Empty state relations */}
-              {(!selectedMember.parents || selectedMember.parents.length === 0) &&
-               (!selectedMember.spouses || selectedMember.spouses.length === 0) &&
-               (!selectedMember.children || selectedMember.children.length === 0) && (
-                <p className="text-xs text-stone-400 italic">Chưa cập nhật thông tin mối quan hệ</p>
-              )}
             </div>
+            
+            {/* Empty state relations */}
+            {(!selectedMember.parents || selectedMember.parents.length === 0) &&
+             (!selectedMember.spouses || selectedMember.spouses.length === 0) &&
+             (!selectedMember.children || selectedMember.children.length === 0) && (
+              <p className="text-xs text-stone-400 italic mt-2">Chưa cập nhật thông tin mối quan hệ</p>
+            )}
           </div>
 
           {/* Biography */}

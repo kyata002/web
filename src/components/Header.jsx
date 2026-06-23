@@ -17,13 +17,19 @@ export default function Header({
 }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  
   const dropdownRef = useRef(null);
+  const menuRef = useRef(null);
 
-  // Close search dropdown on click outside
+  // Close search dropdown and menu on click outside
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setShowDropdown(false);
+      }
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenu(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -51,46 +57,54 @@ export default function Header({
   };
 
   return (
-    <header className="app-header">
-      <div className="logo-area">
-        <i className="fa-solid fa-hands-holding-child logo-icon"></i>
-        <div className="logo-text">
-          <h1>Gia Phả Ký</h1>
-          <span>Sơ đồ gia phả trực quan</span>
+    <header className="app-header flex items-center justify-between px-4 md:px-6 py-3 border-b border-stone-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md sticky top-0 z-[100] h-[70px]">
+      {/* Logo Area */}
+      <div className="logo-area flex items-center gap-3">
+        <div className="logo-icon w-10 h-10 rounded-full bg-amber-50 dark:bg-slate-900 border border-stone-200 dark:border-slate-800 flex items-center justify-center text-amber-600 dark:text-yellow-500 text-lg">
+          <i className="fa-solid fa-hands-holding-child"></i>
+        </div>
+        <div className="logo-text hidden sm:block">
+          <h1 className="font-serif text-lg font-bold text-stone-800 dark:text-slate-100 leading-tight">Gia Phả Ký</h1>
+          <span className="text-[10px] text-stone-500 dark:text-slate-400 tracking-wider uppercase">Sơ đồ gia phả trực quan</span>
         </div>
       </div>
 
-      <div className="search-bar-container" ref={dropdownRef}>
-        <i className="fa-solid fa-magnifying-glass search-icon"></i>
-        <input
-          type="text"
-          id="search-input"
-          placeholder="Tìm kiếm thành viên trong gia tộc..."
-          value={searchTerm}
-          onChange={handleSearchChange}
-          onFocus={() => searchTerm.trim().length > 0 && setShowDropdown(true)}
-        />
+      {/* Search Input */}
+      <div className="search-bar-container relative max-w-sm w-full mx-4" ref={dropdownRef}>
+        <div className="relative">
+          <i className="fa-solid fa-magnifying-glass search-icon absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 dark:text-slate-500 text-xs"></i>
+          <input
+            type="text"
+            id="search-input"
+            className="w-full pl-9 pr-4 py-2 text-sm rounded-full border border-stone-200 dark:border-slate-800 bg-stone-50 dark:bg-slate-900 text-stone-800 dark:text-slate-200 placeholder-stone-400 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/15 focus:bg-white dark:focus:bg-slate-950 transition-all"
+            placeholder="Tìm kiếm người trong gia tộc..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+            onFocus={() => searchTerm.trim().length > 0 && setShowDropdown(true)}
+          />
+        </div>
+        
         {showDropdown && (
-          <div id="search-results" className="search-results-dropdown">
+          <div id="search-results" className="search-results-dropdown absolute top-full left-0 right-0 mt-2 max-h-[300px] overflow-y-auto bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-stone-200 dark:border-slate-850 rounded-2xl shadow-xl z-[110]">
             {filteredMembers.length === 0 ? (
-              <div className="search-result-item">
-                <span className="text-sm text-stone-500 dark:text-slate-400">Không tìm thấy thành viên</span>
+              <div className="p-4 text-center text-sm text-stone-500 dark:text-slate-400 italic">
+                Không tìm thấy thành viên
               </div>
             ) : (
               filteredMembers.map(m => (
                 <div
                   key={m.id}
-                  className="search-result-item"
+                  className="search-result-item flex items-center gap-3 p-3 cursor-pointer hover:bg-stone-50 dark:hover:bg-slate-850 border-b border-stone-100 dark:border-slate-800 last:border-0 transition-colors"
                   onClick={() => handleResultClick(m)}
                 >
                   <img
                     src={getAvatarDataUrl(m.avatar, m.name, m.gender)}
-                    className="search-result-avatar"
+                    className="w-8 h-8 rounded-full object-cover border border-stone-200 dark:border-slate-700 flex-shrink-0"
                     alt={m.name}
                   />
-                  <div className="search-result-info">
-                    <h4>{m.name}</h4>
-                    <p>
+                  <div className="search-result-info min-w-0 flex-1">
+                    <h4 className="text-sm font-semibold text-stone-700 dark:text-slate-200 truncate">{m.name}</h4>
+                    <p className="text-xs text-stone-500 dark:text-slate-400">
                       {m.birthDate || "Chưa rõ"} - {m.isDeceased ? (m.deathDate || "đã mất") : "Hiện tại"}
                     </p>
                   </div>
@@ -101,31 +115,64 @@ export default function Header({
         )}
       </div>
 
-      <div className="header-actions">
-        <button id="btn-stats" className="btn btn-secondary" onClick={onStats} title="Thống kê gia phả">
-          <i className="fa-solid fa-chart-pie"></i> <span className="btn-text">Thống kê</span>
+      {/* Header Actions */}
+      <div className="header-actions flex items-center gap-2">
+        {/* Theme Toggle Button */}
+        <button
+          className="w-9 h-9 flex items-center justify-center rounded-full border border-stone-200 dark:border-slate-800 bg-stone-50 dark:bg-slate-900 text-stone-600 dark:text-slate-300 hover:bg-stone-100 dark:hover:bg-slate-800 hover:scale-105 active:scale-95 transition-all"
+          onClick={onToggleTheme}
+          title="Đổi giao diện"
+        >
+          <i className={`fa-solid ${theme === 'dark-theme' ? 'fa-sun text-yellow-500' : 'fa-moon text-stone-600'}`}></i>
         </button>
-        <button id="btn-reset-demo" className="btn btn-secondary" onClick={onResetDemo} title="Khôi phục dữ liệu mẫu">
-          <i className="fa-solid fa-rotate-left"></i> <span className="btn-text">Đặt lại mẫu</span>
-        </button>
-        <button id="btn-export" className="btn btn-secondary" onClick={onExport} title="Xuất dữ liệu JSON">
-          <i className="fa-solid fa-file-export"></i> <span className="btn-text">Xuất JSON</span>
-        </button>
-        
-        <label htmlFor="import-file-input" className="btn btn-secondary cursor-pointer" title="Nhập dữ liệu JSON">
-          <i className="fa-solid fa-file-import"></i> <span className="btn-text">Nhập JSON</span>
-        </label>
-        <input
-          type="file"
-          id="import-file-input"
-          accept=".json"
-          className="hidden"
-          onChange={onImport}
-        />
-        
-        <button id="theme-toggle" className="btn btn-icon" onClick={onToggleTheme} title="Đổi giao diện">
-          <i className={`fa-solid ${theme === 'dark-theme' ? 'fa-sun' : 'fa-moon'}`}></i>
-        </button>
+
+        {/* Dropdown Menu Container */}
+        <div className="relative" ref={menuRef}>
+          <button
+            className="w-9 h-9 flex items-center justify-center rounded-full border border-stone-200 dark:border-slate-800 bg-stone-50 dark:bg-slate-900 text-stone-600 dark:text-slate-300 hover:bg-stone-100 dark:hover:bg-slate-800 hover:scale-105 active:scale-95 transition-all"
+            onClick={() => setShowMenu(!showMenu)}
+            title="Công cụ & Tiện ích"
+          >
+            <i className="fa-solid fa-ellipsis-vertical text-lg"></i>
+          </button>
+
+          {showMenu && (
+            <div className="absolute right-0 mt-2 w-52 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-stone-200 dark:border-slate-800 rounded-2xl shadow-xl py-2 z-[110] animate-in fade-in slide-in-from-top-2 duration-200">
+              <button
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 dark:text-slate-200 hover:bg-stone-50 dark:hover:bg-slate-800/60 transition-colors text-left"
+                onClick={() => { onStats(); setShowMenu(false); }}
+              >
+                <i className="fa-solid fa-chart-pie text-amber-500 w-4"></i> Thống kê gia phả
+              </button>
+              <button
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 dark:text-slate-200 hover:bg-stone-50 dark:hover:bg-slate-800/60 transition-colors text-left"
+                onClick={() => { onResetDemo(); setShowMenu(false); }}
+              >
+                <i className="fa-solid fa-rotate-left text-amber-500 w-4"></i> Đặt lại mẫu
+              </button>
+              <div className="h-px bg-stone-100 dark:bg-slate-800 my-1" />
+              <button
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 dark:text-slate-200 hover:bg-stone-50 dark:hover:bg-slate-800/60 transition-colors text-left"
+                onClick={() => { onExport(); setShowMenu(false); }}
+              >
+                <i className="fa-solid fa-file-export text-amber-500 w-4"></i> Xuất dữ liệu JSON
+              </button>
+              <label
+                htmlFor="import-file-input-header"
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 dark:text-slate-200 hover:bg-stone-50 dark:hover:bg-slate-800/60 transition-colors text-left cursor-pointer"
+              >
+                <i className="fa-solid fa-file-import text-amber-500 w-4"></i> Nhập dữ liệu JSON
+              </label>
+              <input
+                type="file"
+                id="import-file-input-header"
+                accept=".json"
+                className="hidden"
+                onChange={(e) => { onImport(e); setShowMenu(false); }}
+              />
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );
